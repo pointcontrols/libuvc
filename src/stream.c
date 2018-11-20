@@ -565,10 +565,11 @@ void _uvc_populate_frame_ts_us(uvc_stream_handle_t *strmh, int packet_id) {
 				int64_t diff_incr = strmh->avg_diff - strmh->initial_avg_diff;
 				int64_t td = host_ts_us - strmh->initial_host_ts;
 				double slope = (double)diff_incr / td;
-				//printf("**** After %d frames, avg_diff = %lld, slope=%f\n", strmh->seq+1, strmh->avg_diff, slope);
+				printf("**** After %d frames, avg_diff = %lld, slope=%f\n", strmh->seq+1, strmh->avg_diff, slope);
 				if (strmh->diff_measures > 10 && fabs(slope) > 0.0000005/* 0.000005*/ ) {
 					strmh->corrected_clock_freq *= 1.0 - slope;
 					strmh->initial_avg_diff = -1;
+					strmh->diff_measures = 0;
 					printf("*** Correcting clock frequency to %lu\n", strmh->corrected_clock_freq );
 				}
 			}
