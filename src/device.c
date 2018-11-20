@@ -1367,6 +1367,38 @@ uvc_error_t uvc_parse_vs_frame_format(uvc_streaming_interface_t *stream_if,
   return UVC_SUCCESS;
 }
 
+
+
+/** @internal
+ * @brief Parse a VideoStreaming H264 format block.
+ * @ingroup device
+ */
+uvc_error_t uvc_parse_vs_format_h264(uvc_streaming_interface_t *stream_if,
+					     const unsigned char *block,
+					     size_t block_size) {
+  UVC_ENTER();
+
+  uvc_format_desc_t *format = calloc(1, sizeof(*format));
+
+  format->parent = stream_if;
+  format->bDescriptorSubtype = block[2];
+  format->bFormatIndex = block[3];
+  memcpy(format->fourccFormat, "X264", 4);
+  format->bmFlags = block[5];
+  format->bBitsPerPixel = 0;
+  format->bDefaultFrameIndex = block[6];
+  format->bAspectRatioX = block[7];
+  format->bAspectRatioY = block[8];
+  format->bmInterlaceFlags = block[9];
+  format->bCopyProtect = block[10];
+
+  DL_APPEND(stream_if->format_descs, format);
+
+  UVC_EXIT(UVC_SUCCESS);
+  return UVC_SUCCESS;
+}
+
+
 /** @internal
  * @brief Parse a VideoStreaming MJPEG format block.
  * @ingroup device
@@ -1395,6 +1427,57 @@ uvc_error_t uvc_parse_vs_format_mjpeg(uvc_streaming_interface_t *stream_if,
   UVC_EXIT(UVC_SUCCESS);
   return UVC_SUCCESS;
 }
+
+/** @internal
+ * @brief Parse a VideoStreaming h264 frame block.
+ * @ingroup device
+ */
+uvc_error_t uvc_parse_vs_frame_h264(uvc_streaming_interface_t *stream_if,
+					    const unsigned char *block,
+					    size_t block_size) {
+  uvc_format_desc_t *format;
+  uvc_frame_desc_t *frame;
+
+  const unsigned char *p;
+  int i;
+
+  UVC_ENTER();
+
+  format = stream_if->format_descs->prev;
+  frame = calloc(1, sizeof(*frame));
+
+  frame->parent = format;
+
+  frame->bDescriptorSubtype = block[2];
+  frame->bFrameIndex = block[3];
+
+  frame->wWidth = block[4] + (block[5] << 8);
+  frame->wHeight = block[6] + (block[7] << 8);
+  frame->bmCapabilities = block[21];
+  frame->dwMinBitRate = DW_TO_INT(&block[31]);
+  frame->dwMaxBitRate = DW_TO_INT(&block[35]);
+  frame->dwDefaultFrameInterval = DW_TO_INT(&block[39]);
+
+  frame->bFrameIntervalType = block[21];
+  //frame->dwBytesPerLine = DW_TO_INT(&block[22]);
+
+
+  frame->intervals = calloc(block[43] + 1, sizeof(frame->intervals[0]));
+  p = &block[44];
+
+  for (i = 0; i < block[43]; ++i) {
+	  frame->intervals[i] = DW_TO_INT(p);
+	  p += 4;
+  }
+  frame->intervals[block[21]] = 0;
+
+
+  DL_APPEND(format->frame_descs, frame);
+
+  UVC_EXIT(UVC_SUCCESS);
+  return UVC_SUCCESS;
+}
+
 
 /** @internal
  * @brief Parse a VideoStreaming uncompressed frame block.
@@ -1555,6 +1638,12 @@ uvc_error_t uvc_parse_vs(
   case UVC_VS_FORMAT_STREAM_BASED:
     // fprintf ( stderr, "unsupported descriptor subtype VS_FORMAT_STREAM_BASED\n" );
     break;
+  case UVC_VS_FORMAT_H264:
+	ret = uvc_parse_vs_format_h264(stream_if, block, block_size);
+	break;
+  case UVC_VS_FRAME_H264:
+	ret = uvc_parse_vs_frame_h264(stream_if, block, block_size);
+	break;
   default:
     /** @todo handle JPEG and maybe still frames or even DV... */
     //fprintf ( stderr, "unsupported descriptor subtype: %d\n",descriptor_subtype );
