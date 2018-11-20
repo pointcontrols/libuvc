@@ -87,6 +87,7 @@ enum uvc_frame_format {
   UVC_FRAME_FORMAT_SGBRG8,
   UVC_FRAME_FORMAT_SRGGB8,
   UVC_FRAME_FORMAT_SBGGR8,
+  UVC_FRAME_FORMAT_H264,
   /** Number of formats understood */
   UVC_FRAME_FORMAT_COUNT,
 };
