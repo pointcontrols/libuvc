@@ -201,6 +201,20 @@ typedef struct uvc_format_desc {
   struct uvc_frame_desc *frame_descs;
 } uvc_format_desc_t;
 
+
+/** VideoStream interface */
+typedef struct uvc_streaming_interface {
+  struct uvc_device_info *parent;
+  struct uvc_streaming_interface *prev, *next;
+  /** Interface number */
+  uint8_t bInterfaceNumber;
+  /** Video formats that this interface provides */
+  struct uvc_format_desc *format_descs;
+  /** USB endpoint to use when communicating with this interface */
+  uint8_t bEndpointAddress;
+  uint8_t bTerminalLink;
+} uvc_streaming_interface_t;
+
 /** UVC request code (A.8) */
 enum uvc_req_code {
   UVC_RC_UNDEFINED = 0x00,
@@ -547,6 +561,7 @@ uvc_error_t uvc_get_stream_ctrl_format_size(
     );
 
 const uvc_format_desc_t *uvc_get_format_descs(uvc_device_handle_t* );
+uvc_streaming_interface_t *uvc_get_streaming_ifs(uvc_device_handle_t *devh);
 
 uvc_error_t uvc_probe_stream_ctrl(
     uvc_device_handle_t *devh,

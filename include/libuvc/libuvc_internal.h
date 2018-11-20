@@ -166,18 +166,7 @@ enum uvc_status_type {
 struct uvc_streaming_interface;
 struct uvc_device_info;
 
-/** VideoStream interface */
-typedef struct uvc_streaming_interface {
-  struct uvc_device_info *parent;
-  struct uvc_streaming_interface *prev, *next;
-  /** Interface number */
-  uint8_t bInterfaceNumber;
-  /** Video formats that this interface provides */
-  struct uvc_format_desc *format_descs;
-  /** USB endpoint to use when communicating with this interface */
-  uint8_t bEndpointAddress;
-  uint8_t bTerminalLink;
-} uvc_streaming_interface_t;
+
 
 /** VideoControl interface */
 typedef struct uvc_control_interface {

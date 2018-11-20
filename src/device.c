@@ -1847,3 +1847,7 @@ void uvc_set_button_callback(uvc_device_handle_t *devh,
 const uvc_format_desc_t *uvc_get_format_descs(uvc_device_handle_t *devh) {
   return devh->info->stream_ifs->format_descs;
 }
+
+uvc_streaming_interface_t *uvc_get_streaming_ifs(uvc_device_handle_t *devh) {
+  return devh->info->stream_ifs;
+}
