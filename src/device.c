@@ -1346,6 +1346,8 @@ uvc_error_t uvc_parse_vs_frame_format(uvc_streaming_interface_t *stream_if,
 					     size_t block_size) {
   UVC_ENTER();
 
+  printf("ENTER uvc_parse_vs_frame_format\n");
+
   uvc_format_desc_t *format = calloc(1, sizeof(*format));
 
   format->parent = stream_if;

@@ -108,6 +108,7 @@ uvc_error_t uvc_set_ae_mode(uvc_device_handle_t *devh, uint8_t mode) {
 
   data[0] = mode;
 
+
   ret = libusb_control_transfer(
     devh->usb_devh,
     REQ_TYPE_SET, UVC_SET_CUR,
