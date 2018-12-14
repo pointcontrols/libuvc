@@ -655,7 +655,6 @@ void _uvc_process_payload(uvc_stream_handle_t *strmh, uint8_t *payload, size_t p
       /* The frame ID bit was flipped, but we have image data sitting
          around from prior transfers. This means the camera didn't send
          an EOF for the last transfer of the previous frame. */
-
       _uvc_swap_buffers(strmh);
     }
 
@@ -668,7 +667,6 @@ void _uvc_process_payload(uvc_stream_handle_t *strmh, uint8_t *payload, size_t p
     strmh->fid = header_info & 1;
 
     if (header_info & (1 << 2)) {
-      //printf("PTS present!\n");
       strmh->pts = DW_TO_INT(payload + variable_offset);
       variable_offset += 4;
     }
@@ -687,12 +685,6 @@ void _uvc_process_payload(uvc_stream_handle_t *strmh, uint8_t *payload, size_t p
     if (header_info & (1 << 1)) {
       _uvc_populate_frame_ts_us(strmh, packet_id);
       /* The EOF bit is set, so publish the complete frame */
-      printf("Frame!\n");
-      int64_t ts = 0;
-      static int64_t prev_ts = 0;
-      get_precise_timestamp(&ts);
-      printf("Frame time dif = %lld\n", ts - prev_ts);
-      prev_ts = ts;
       _uvc_swap_buffers(strmh);
     }
   }
@@ -1311,11 +1303,12 @@ uvc_error_t uvc_stream_get_frame(uvc_stream_handle_t *strmh,
   } else if (timeout_us != -1) {
     if (timeout_us == 0) {
       pthread_cond_wait(&strmh->cb_cond, &strmh->cb_mutex);
-    } else {
+    }
+else {
       ts = get_abs_future_time_coarse(timeout_us/1000);
       if (ETIMEDOUT ==  pthread_cond_timedwait(&strmh->cb_cond, &strmh->cb_mutex, &ts)) {
         UVC_DEBUG("TIMEOUT!");
-    }
+      }
 
 
     }
